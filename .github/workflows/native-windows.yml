@@ -1,0 +1,33 @@
+name: msvc-64
+on: [push]
+jobs:
+  build-msi:
+    runs-on: windows-2019
+    container:
+      image: registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2021-10-01.0-master
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: "Native Windows VS 2019 x64"
+        env:
+          # .cerbero
+          CERBERO_HOME: "cerbero-build"
+          CERBERO_SOURCES: "cerbero-sources"
+          CERBERO: "./cerbero-uninstalled -c config/${CONFIG} -c localconf.cbc"
+          CERBERO_PACKAGE_ARGS: "-t" # create a tarball instead of an MSI because it is faster
+          # .cerbero windows native
+          CONFIG: 'win64.cbc'
+          ARCH: 'msvc_x86_64'
+          CERBERO_HOST_DIR: "C:/cerbero"
+          CERBERO_ARGS: "--variants werror --timestamps -v visualstudio -v nowerror"
+          CERBERO_RUN_SUFFIX: ".exe"
+          HAVE_CCACHE: ""
+        run: |
+          C:\MinGW\msys\1.0\bin\bash.exe --login -c "env; pwd; ls -lha; ls -lha $env:GITHUB_WORKSPACE"
+          #C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_before_script"
+          #C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
+     #- name: Upload binaries
+     #  uses: actions/upload-artifact@v2
+     #  with:
+     #    name: tarballs
+     #    path: *.tar.*
